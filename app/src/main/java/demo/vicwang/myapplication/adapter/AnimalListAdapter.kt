@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Build
 import android.support.v7.widget.RecyclerView
 import android.text.Html
+import android.text.Spanned
 import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
 import android.view.View
@@ -60,13 +61,14 @@ class AnimalListAdapter(context: Context, data: MainHouseListItem, animalData: A
             viewHolder.wTxt_Top_Rest.text = if (mTopAreaData.E_Memo == "") mContext.getString(R.string.main_house_no_rest_date) else mTopAreaData.E_Memo
             viewHolder.wTxt_Top_Area.text = mTopAreaData.E_Category
 
-            var link = "<a href=\"" + mTopAreaData.E_URL + "\">" + mContext.getString(R.string.house_list_item_top_open_web) + "</a>"
+            val link = "<a href=\"" + mTopAreaData.E_URL + "\">" + mContext.getString(R.string.house_list_item_top_open_web) + "</a>"
+            var str: Spanned
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                link = Html.fromHtml(link, Html.FROM_HTML_MODE_LEGACY).toString();
+                str = Html.fromHtml(link, Html.FROM_HTML_MODE_LEGACY)
             } else {
-                link = Html.fromHtml(link).toString()
+                str = Html.fromHtml(link)
             }
-            viewHolder.wTxt_Top_Open_Web.text = link
+            viewHolder.wTxt_Top_Open_Web.text = str
             viewHolder.wTxt_Top_Open_Web.movementMethod = LinkMovementMethod.getInstance()
 
             viewHolder.wTxt_Top_No_Plant.visibility = if (mAnimalData.size == 0) View.VISIBLE else View.GONE
