@@ -16,7 +16,6 @@ import demo.vicwang.myapplication.adapter.item.HouseListAnimalItem
 import demo.vicwang.myapplication.adapter.item.MainHouseListItem
 import demo.vicwang.myapplication.fragment.AnimalInfoFragment
 import demo.vicwang.myapplication.fragment.HouseInfoFragment
-import demo.vicwang.myapplication.mvp.model.ApiRepository
 import demo.vicwang.myapplication.mvp.presenter.MainBridge
 import demo.vicwang.myapplication.mvp.presenter.MainPresenter
 import demo.vicwang.myapplication.utility.ViewClick
@@ -24,6 +23,7 @@ import org.koin.android.ext.android.inject
 import org.koin.core.parameter.parametersOf
 import java.util.*
 
+//class MainActivity : BasicActivity(), NewMainBridge.View, MainView {
 class MainActivity : BasicActivity(), MainBridge.View, MainView {
 
     /*
@@ -42,6 +42,7 @@ class MainActivity : BasicActivity(), MainBridge.View, MainView {
     /*
      * Presenter
      * */
+//    private val mPresenter: NewMainPresenter by inject { parametersOf(this) }
     private val mPresenter: MainPresenter by inject { parametersOf(this) }
 
     /*

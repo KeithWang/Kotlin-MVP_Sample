@@ -33,7 +33,7 @@ class ApiRepository : MainBridge.Model {
                     Log.d("okhttp", "cache---$str")
 
                 } else {
-                    str = response.body().string()
+                    str = response.body()!!.string()
                     Log.d("okhttp", "network---$str")
                 }
                 callback.onSuccess(str)
@@ -65,7 +65,7 @@ class ApiRepository : MainBridge.Model {
                     Log.d("okhttp", "cache---$str")
 
                 } else {
-                    str = response.body().string()
+                    str = response.body()!!.string()
                     Log.d("okhttp", "network---$str")
                 }
                 callback.onSuccess(str)
