@@ -1,46 +1,42 @@
-package demo.vicwang.myapplication.mvp.presenter
+package demo.vicwang.myapplication.mvp.presenter.rxjava
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import demo.vicwang.myapplication.adapter.item.HouseListAnimalItem
 import demo.vicwang.myapplication.adapter.item.MainHouseListItem
-import demo.vicwang.myapplication.mvp.model.normal.ApiCallback
-import demo.vicwang.myapplication.mvp.model.normal.ApiRepository
 import demo.vicwang.myapplication.mvp.model.ResponseItem
-import demo.vicwang.myapplication.mvp.presenter.normal.MainBridge
-import demo.vicwang.myapplication.mvp.presenter.normal.MainPresenter
+import demo.vicwang.myapplication.mvp.model.retrofit.RetrofitApiRepository
+import demo.vicwang.myapplication.mvp.presenter.rxjava.provider.TrampolineSchedulerProvider
+import io.reactivex.Observable
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito
-import org.mockito.Mockito.*
+import org.mockito.Mockito.`when`
+import org.mockito.Mockito.verify
 import java.util.*
 
 
-class MainPresenterTest {
+class RxMainPresenterTest {
 
-    private lateinit var presenter: MainPresenter
+    private lateinit var presenter: RxMainPresenter
 
-    private val view: MainBridge.View = mock(MainBridge.View::class.java)
-    private val rope: ApiRepository = mock(ApiRepository::class.java)
+    private val view: RxMainBridge.View = Mockito.mock(RxMainBridge.View::class.java)
+    private val rope: RetrofitApiRepository = Mockito.mock(RetrofitApiRepository::class.java)
+    private val rxProvider: TrampolineSchedulerProvider = TrampolineSchedulerProvider()
 
     private fun <T> any(type: Class<T>): T = Mockito.any<T>(type)
 
     @Before
     fun setup() {
-        presenter = MainPresenter(view, rope)
+        presenter = RxMainPresenter(view, rope, rxProvider)
     }
 
     @Test
-    fun `Init House Data Has Http Failed`() {
-        val failString = "fail"
+    fun `Init House Data Has Http Failed or Observable Is Null`() {
         val expectErrorType = 1
 
-        doAnswer {
-            val arguments = it.arguments
-            val callback = arguments[0] as ApiCallback
-            callback.onFailed(failString, Exception())
-        }.`when`(rope).getHouseData(any(ApiCallback::class.java))
+        `when`(rope.getHouseData()).thenReturn(Observable.error(NullPointerException()))
 
         presenter.initHouseData()
 
@@ -48,15 +44,13 @@ class MainPresenterTest {
     }
 
     @Test
-    fun `Init House Data Has Http Success But Json Error`() {
-        val successJsonStr = ""
+    fun `Init House Data Has Http Success But Json Inner Error`() {
+        val successJsonStr = "{}"
         val expectErrorType = 1
 
-        doAnswer {
-            val arguments = it.arguments
-            val callback = arguments[0] as ApiCallback
-            callback.onSuccess(successJsonStr)
-        }.`when`(rope).getHouseData(any(ApiCallback::class.java))
+        val item = Gson().fromJson(successJsonStr, ResponseItem::class.java)
+
+        `when`(rope.getHouseData()).thenReturn(Observable.just(item))
 
         presenter.initHouseData()
 
@@ -67,34 +61,25 @@ class MainPresenterTest {
     fun `Init House Data Has Http Success`() {
         val successJsonStr = "{\"result\":{\"results\":[{\"E_Pic_URL\":\"\",\"E_Geo\":\"\",\"E_Info\":\"\",\"E_no\":\"1\",\"E_Category\":\"\",\"E_Name\":\"\",\"E_Memo\":\"\",\"_id\":1,\"E_URL\":\"\"},{\"E_Pic_URL\":\"\",\"E_Geo\":\"\",\"E_Info\":\"\",\"E_no\":\"1\",\"E_Category\":\"\",\"E_Name\":\"\",\"E_Memo\":\"\",\"_id\":1,\"E_URL\":\"\"}]}}"
 
-        val successArray = Gson().fromJson(successJsonStr, ResponseItem::class.java).resultJsonArray
+        val item = Gson().fromJson(successJsonStr, ResponseItem::class.java)
 
-        val listType = object : TypeToken<ArrayList<MainHouseListItem>>() {}.type
-        val successListData: ArrayList<MainHouseListItem> = Gson().fromJson(successArray.toString(), listType)
-
-        doAnswer {
-            val arguments = it.arguments
-            val callback = arguments[0] as ApiCallback
-            callback.onSuccess(successJsonStr)
-        }.`when`(rope).getHouseData(any(ApiCallback::class.java))
+        `when`(rope.getHouseData()).thenReturn(Observable.just(item))
 
         presenter.initHouseData()
 
-        verify(view).onHouseDataLoadSuccess(successArray.toString(), successListData)
+        val listType = object : TypeToken<ArrayList<MainHouseListItem>>() {}.type
+        val listData: ArrayList<MainHouseListItem> = Gson().fromJson(item.resultJsonArray.toString(), listType)
+
+        verify(view).onHouseDataLoadSuccess(item.resultJsonArray.toString(), listData)
     }
 
     @Test
-    fun `Init Animal Data Has Http Failed`() {
-        val failString = "fail"
-        val expectErrorType = 0
+    fun `Init Animal Data Has Http Failed or Observable Is Null`() {
+        val expectErrorType = 1
         val houseItemStr = "{\"E_Pic_URL\":\"\",\"E_Geo\":\"\",\"E_Info\":\"\",\"E_no\":\"1\",\"E_Category\":\"\",\"E_Name\":\"\",\"E_Memo\":\"\",\"_id\":1,\"E_URL\":\"\"}"
         val houseItem = Gson().fromJson(houseItemStr, MainHouseListItem::class.java)
 
-        doAnswer {
-            val arguments = it.arguments
-            val callback = arguments[1] as ApiCallback
-            callback.onFailed(failString, Exception())
-        }.`when`(rope).getAnimalData(ArgumentMatchers.anyString(), any(ApiCallback::class.java))
+        `when`(rope.getAnimalData(ArgumentMatchers.anyString())).thenReturn(Observable.error(NullPointerException()))
 
         presenter.initAnimalData(houseItem)
 
@@ -102,17 +87,15 @@ class MainPresenterTest {
     }
 
     @Test
-    fun `Init Animal Data Has Http Success But Json Error`() {
-        val successJsonStr = ""
+    fun `Init Animal Data Has Http Success But Json Inner Error`() {
+        val successJsonStr = "{}"
         val expectErrorType = 1
         val houseItemStr = "{\"E_Pic_URL\":\"\",\"E_Geo\":\"\",\"E_Info\":\"\",\"E_no\":\"1\",\"E_Category\":\"\",\"E_Name\":\"\",\"E_Memo\":\"\",\"_id\":1,\"E_URL\":\"\"}"
         val houseItem = Gson().fromJson(houseItemStr, MainHouseListItem::class.java)
 
-        doAnswer {
-            val arguments = it.arguments
-            val callback = arguments[1] as ApiCallback
-            callback.onSuccess(successJsonStr)
-        }.`when`(rope).getAnimalData(ArgumentMatchers.anyString(), any(ApiCallback::class.java))
+        val item = Gson().fromJson(successJsonStr, ResponseItem::class.java)
+
+        `when`(rope.getAnimalData(ArgumentMatchers.anyString())).thenReturn(Observable.just(item))
 
         presenter.initAnimalData(houseItem)
 
@@ -125,22 +108,16 @@ class MainPresenterTest {
         val houseItemStr = "{\"E_Pic_URL\":\"\",\"E_Geo\":\"\",\"E_Info\":\"\",\"E_no\":\"1\",\"E_Category\":\"\",\"E_Name\":\"\",\"E_Memo\":\"\",\"_id\":1,\"E_URL\":\"\"}"
         val houseItem = Gson().fromJson(houseItemStr, MainHouseListItem::class.java)
 
-        val ansArray = Gson().fromJson(successJsonStr, ResponseItem::class.java).resultJsonArray
-
-        val listType = object : TypeToken<ArrayList<HouseListAnimalItem>>() {}.type
-        val ansListData: ArrayList<HouseListAnimalItem> = Gson().fromJson(ansArray.toString(), listType)
+        val item = Gson().fromJson(successJsonStr, ResponseItem::class.java)
 
 
-        doAnswer {
-            val arguments = it.arguments
-            val callback = arguments[1] as ApiCallback
-            callback.onSuccess(successJsonStr)
-        }.`when`(rope).getAnimalData(ArgumentMatchers.anyString(), any(ApiCallback::class.java))
+        `when`(rope.getAnimalData(ArgumentMatchers.anyString())).thenReturn(Observable.just(item))
 
         presenter.initAnimalData(houseItem)
 
-        verify(view).onAnimalDataLoadSuccess(ansArray.toString(), ansListData, houseItem)
+        val listType = object : TypeToken<ArrayList<HouseListAnimalItem>>() {}.type
+        val listData: ArrayList<HouseListAnimalItem> = Gson().fromJson(item.resultJsonArray.toString(), listType)
+
+        verify(view).onAnimalDataLoadSuccess(item.resultJsonArray.toString(), listData, houseItem)
     }
-
-
 }

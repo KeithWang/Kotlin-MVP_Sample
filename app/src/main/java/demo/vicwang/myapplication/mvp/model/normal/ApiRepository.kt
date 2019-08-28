@@ -1,7 +1,7 @@
-package demo.vicwang.myapplication.mvp.model
+package demo.vicwang.myapplication.mvp.model.normal
 
 import android.util.Log
-import demo.vicwang.myapplication.mvp.presenter.MainBridge
+import demo.vicwang.myapplication.mvp.presenter.normal.MainBridge
 import okhttp3.*
 import java.io.IOException
 import java.util.concurrent.TimeUnit

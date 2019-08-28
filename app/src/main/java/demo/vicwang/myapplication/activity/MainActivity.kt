@@ -16,15 +16,15 @@ import demo.vicwang.myapplication.adapter.item.HouseListAnimalItem
 import demo.vicwang.myapplication.adapter.item.MainHouseListItem
 import demo.vicwang.myapplication.fragment.AnimalInfoFragment
 import demo.vicwang.myapplication.fragment.HouseInfoFragment
-import demo.vicwang.myapplication.mvp.presenter.MainBridge
-import demo.vicwang.myapplication.mvp.presenter.MainPresenter
+import demo.vicwang.myapplication.mvp.presenter.rxjava.RxMainBridge
+import demo.vicwang.myapplication.mvp.presenter.rxjava.RxMainPresenter
 import demo.vicwang.myapplication.utility.ViewClick
 import org.koin.android.ext.android.inject
 import org.koin.core.parameter.parametersOf
 import java.util.*
 
-//class MainActivity : BasicActivity(), NewMainBridge.View, MainView {
-class MainActivity : BasicActivity(), MainBridge.View, MainView {
+class MainActivity : BasicActivity(), RxMainBridge.View, MainView {
+//class MainActivity : BasicActivity(), MainBridge.View, MainView {
 
     /*
      * Tool or page widget
@@ -42,8 +42,8 @@ class MainActivity : BasicActivity(), MainBridge.View, MainView {
     /*
      * Presenter
      * */
-//    private val mPresenter: NewMainPresenter by inject { parametersOf(this) }
-    private val mPresenter: MainPresenter by inject { parametersOf(this) }
+    private val mPresenter: RxMainPresenter by inject { parametersOf(this) }
+//    private val mPresenter: MainPresenter by inject { parametersOf(this) }
 
     /*
      * Main Page data
@@ -56,13 +56,14 @@ class MainActivity : BasicActivity(), MainBridge.View, MainView {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-    }
-
-    override fun setActivityView() {
         setContentView(R.layout.activity_main)
+        viewInit()
+        setViewValue()
+        setViewListener()
     }
 
-    override fun viewInit() {
+
+    private fun viewInit() {
 
         wRecycleView = findViewById(R.id.main_recycleview)
 
@@ -73,7 +74,7 @@ class MainActivity : BasicActivity(), MainBridge.View, MainView {
         wLay_Loading_Area = findViewById(R.id.main_lay_loading_area)
     }
 
-    override fun setViewValue() {
+    private fun setViewValue() {
         //data loading
         onShowLoadingView(true)
         mPresenter.initHouseData()
@@ -81,7 +82,7 @@ class MainActivity : BasicActivity(), MainBridge.View, MainView {
         setTitleBar("", true, false)
     }
 
-    override fun setViewListener() {
+    private fun setViewListener() {
         wLay_Btn_Home.setOnClickListener(mNormalClickListener)
     }
 

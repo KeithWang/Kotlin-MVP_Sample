@@ -26,19 +26,7 @@ abstract class BasicActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mContext = this
-        setActivityView()
-        viewInit()
-        setViewValue()
-        setViewListener()
     }
-
-    internal abstract fun setActivityView()
-
-    internal abstract fun viewInit()
-
-    internal abstract fun setViewValue()
-
-    internal abstract fun setViewListener()
 
     /*
      * Back Pressed fun

@@ -1,13 +1,12 @@
-package demo.vicwang.myapplication.mvp.presenter.rxjava
+package demo.vicwang.myapplication.mvp.presenter.normal
 
-import com.google.gson.JsonObject
 import demo.vicwang.myapplication.adapter.item.MainHouseListItem
+import demo.vicwang.myapplication.mvp.model.normal.ApiCallback
 import demo.vicwang.myapplication.mvp.presenter.base.BaseModel
 import demo.vicwang.myapplication.mvp.presenter.base.BasePresenter
 import demo.vicwang.myapplication.mvp.presenter.base.BaseView
-import io.reactivex.Observable
 
-interface NewMainBridge {
+interface MainBridge {
     interface View : BaseView<Presenter> {
         fun onShowLoadingView(isShow: Boolean)
 
@@ -25,10 +24,9 @@ interface NewMainBridge {
     }
 
     interface Model : BaseModel {
+        fun getHouseData(callback: ApiCallback)
 
-        fun getHouseData(): Observable<JsonObject>
-
-        fun getAnimalData(targetArea: String): Observable<JsonObject>
+        fun getAnimalData(targetArea: String, callback: ApiCallback)
     }
 
 }

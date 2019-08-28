@@ -1,4 +1,4 @@
-package demo.vicwang.myapplication.mvp.model
+package demo.vicwang.myapplication.mvp.model.normal
 
 interface ApiCallback {
     fun onSuccess(resultMsg: String)
