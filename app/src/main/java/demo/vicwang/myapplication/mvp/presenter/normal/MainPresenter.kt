@@ -15,6 +15,7 @@ class MainPresenter(view: MainBridge.View, repo: ApiRepository) : MainBridge.Pre
     private val mApiRepo: ApiRepository = repo
 
     override fun initHouseData() {
+        mView.onShowLoadingView(true)
         mApiRepo.getHouseData(object : ApiCallback {
             override fun onSuccess(resultMsg: String) {
                 try {
@@ -24,20 +25,24 @@ class MainPresenter(view: MainBridge.View, repo: ApiRepository) : MainBridge.Pre
                     val listData: ArrayList<MainHouseListItem> = Gson().fromJson(array.toString(), listType)
 
                     mView.onHouseDataLoadSuccess(array.toString(), listData)
+                    mView.onShowLoadingView(false)
 
                 } catch (e: Exception) {
                     mView.onShowErrorMsg(1)
+                    mView.onShowLoadingView(false)
                 }
 
             }
 
             override fun onFailed(errorMsg: String, e: Exception) {
                 mView.onShowErrorMsg(1)
+                mView.onShowLoadingView(false)
             }
         })
     }
 
     override fun initAnimalData(item: MainHouseListItem) {
+        mView.onShowLoadingView(true)
         mApiRepo.getAnimalData(item.E_Name, object : ApiCallback {
             override fun onSuccess(resultMsg: String) {
                 try {
@@ -46,14 +51,17 @@ class MainPresenter(view: MainBridge.View, repo: ApiRepository) : MainBridge.Pre
                     val listData: ArrayList<HouseListAnimalItem> = Gson().fromJson(array.toString(), listType)
 
                     mView.onAnimalDataLoadSuccess(array.toString(), listData, item)
+                    mView.onShowLoadingView(false)
                 } catch (e: Exception) {
                     mView.onShowErrorMsg(1)
+                    mView.onShowLoadingView(false)
                 }
 
             }
 
             override fun onFailed(errorMsg: String, e: Exception) {
                 mView.onShowErrorMsg(0)
+                mView.onShowLoadingView(false)
             }
         })
     }

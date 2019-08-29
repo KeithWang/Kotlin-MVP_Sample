@@ -76,7 +76,6 @@ class MainActivity : BasicActivity(), RxMainBridge.View, MainView {
 
     private fun setViewValue() {
         //data loading
-        onShowLoadingView(true)
         mPresenter.initHouseData()
 
         setTitleBar("", true, false)
@@ -148,14 +147,12 @@ class MainActivity : BasicActivity(), RxMainBridge.View, MainView {
 
     override fun onShowErrorMsg(errorType: Int) {
         runOnUiThread {
-            onShowLoadingView(false)
             openErrorDialog(getString(R.string.http_get_error), errorType)
         }
     }
 
     override fun onHouseDataLoadSuccess(result: String, o: Any) {
         runOnUiThread {
-            onShowLoadingView(false)
             loadListItem(o as ArrayList<MainHouseListItem>)
         }
     }
@@ -163,7 +160,6 @@ class MainActivity : BasicActivity(), RxMainBridge.View, MainView {
     override fun onAnimalDataLoadSuccess(result: String, o: Any, item: MainHouseListItem) {
         runOnUiThread {
             setTitleBar(item.E_Name, false, false)
-            onShowLoadingView(false)
 
             onOpenFragment(
                     HouseInfoFragment.newInstance(item, o as ArrayList<HouseListAnimalItem>)
@@ -190,9 +186,8 @@ class MainActivity : BasicActivity(), RxMainBridge.View, MainView {
      * */
     private val recycleClick = object : MainHouseListAdapter.ItemClickListener {
         override fun onItemClick(view: View, position: Int) {
-            onShowLoadingView(true)
-            mAreaSelectItem = mData.get(position)
-            mPresenter.initAnimalData(mData.get(position))
+            mAreaSelectItem = mData[position]
+            mPresenter.initAnimalData(mData[position])
         }
     }
 

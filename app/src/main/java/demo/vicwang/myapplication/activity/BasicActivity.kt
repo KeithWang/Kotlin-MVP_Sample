@@ -60,7 +60,7 @@ abstract class BasicActivity : AppCompatActivity() {
         val confirm = mDialog.findViewById<Button>(R.id.custom_dialog_btn_confirm)
         val txt = mDialog.findViewById<TextView>(R.id.custom_dialog_txt_content)
 
-        txt.setText(contentStr)
+        txt.text = contentStr
 
         val permission = View.OnClickListener { v ->
             when (v.id) {
@@ -73,6 +73,7 @@ abstract class BasicActivity : AppCompatActivity() {
         }
         confirm.setOnClickListener(permission)
 
-        mDialog.show()
+        if (!this.isFinishing)
+            mDialog.show()
     }
 }

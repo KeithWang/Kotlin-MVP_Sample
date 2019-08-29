@@ -17,6 +17,8 @@ class RxMainPresenter(private val mView: RxMainBridge.View
         mApiRepo.getHouseData()
                 .subscribeOn(mRxProvider.io())
                 .observeOn(mRxProvider.ui())
+                .doOnSubscribe { mView.onShowLoadingView(true) }
+                .doOnTerminate { mView.onShowLoadingView(false) }
                 .subscribe({ result ->
                     val array = result.resultJsonArray
                     val listType = object : TypeToken<ArrayList<MainHouseListItem>>() {}.type
@@ -33,6 +35,8 @@ class RxMainPresenter(private val mView: RxMainBridge.View
         mApiRepo.getAnimalData(item.E_Name)
                 .subscribeOn(mRxProvider.io())
                 .observeOn(mRxProvider.ui())
+                .doOnSubscribe { mView.onShowLoadingView(true) }
+                .doOnTerminate { mView.onShowLoadingView(false) }
                 .subscribe({ result ->
                     val array = result.resultJsonArray
                     val listType = object : TypeToken<ArrayList<HouseListAnimalItem>>() {}.type
