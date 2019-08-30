@@ -7,11 +7,18 @@ import demo.vicwang.myapplication.mvp.presenter.normal.MainPresenter
 import demo.vicwang.myapplication.mvp.presenter.rxjava.RxMainBridge
 import demo.vicwang.myapplication.mvp.presenter.rxjava.RxMainPresenter
 import demo.vicwang.myapplication.mvp.presenter.rxjava.provider.AppSchedulerProvider
+import demo.vicwang.myapplication.mvp.presenter.rxjava.provider.SchedulerProvider
 import org.koin.dsl.module
 
 val ApplicationModule = module {
 
-    factory { (view: MainBridge.View) -> MainPresenter(view, ApiRepository()) }
+    single { ApiRepository() }
 
-    factory { (view: RxMainBridge.View) -> RxMainPresenter(view, RetrofitApiRepository(), AppSchedulerProvider()) }
+    factory { (view: MainBridge.View) -> MainPresenter(view, get()) }
+
+    single<SchedulerProvider> { AppSchedulerProvider() }
+
+    single { RetrofitApiRepository() }
+
+    factory { (view: RxMainBridge.View) -> RxMainPresenter(view, get(), get()) }
 }
