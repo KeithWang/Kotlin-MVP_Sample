@@ -18,13 +18,17 @@ interface MainBridge {
     }
 
     interface Presenter : BasePresenter<Model> {
-        fun initHouseData()
+        fun onLogin(email: String, password: String)
+
+        fun initHouseData(token: String)
 
         fun initAnimalData(item: MainHouseListItem)
     }
 
     interface Model : BaseModel {
-        fun getHouseData(callback: ApiCallback)
+        fun getToken(email: String, password: String, callback: ApiCallback)
+
+        fun getHouseData(token: String, callback: ApiCallback)
 
         fun getAnimalData(targetArea: String, callback: ApiCallback)
     }

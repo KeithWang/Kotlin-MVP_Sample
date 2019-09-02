@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import demo.vicwang.myapplication.adapter.item.HouseListAnimalItem
 import demo.vicwang.myapplication.adapter.item.MainHouseListItem
+import demo.vicwang.myapplication.mvp.model.LoginResponseItem
 import demo.vicwang.myapplication.mvp.model.ResponseItem
 import demo.vicwang.myapplication.mvp.model.retrofit.RetrofitApiRepository
 import demo.vicwang.myapplication.mvp.presenter.rxjava.provider.TrampolineSchedulerProvider
@@ -33,39 +34,79 @@ class RxMainPresenterTest {
     }
 
     @Test
+    fun `Login Fail`() {
+        val account = "account"
+        val password = "password"
+        val resultStr = "{}"
+        val expectErrorType = 2
+
+        val item = Gson().fromJson(resultStr, LoginResponseItem::class.java)
+
+        `when`(rope.getToken(account, password)).thenReturn(Observable.error(Exception()))
+
+        presenter.onLogin(account, password)
+
+        verify(view).onShowErrorMsg(expectErrorType)
+    }
+
+    @Test
+    fun `Login Success And Get Data Success`() {
+        val account = "account"
+        val password = "password"
+        val resultStr = "{\"token\":\"token\"}"
+        val itemLogin = Gson().fromJson(resultStr, LoginResponseItem::class.java)
+        `when`(rope.getToken(account, password)).thenReturn(Observable.just(itemLogin))
+
+        val successJsonStr = "{\"result\":{\"results\":[{\"E_Pic_URL\":\"\",\"E_Geo\":\"\",\"E_Info\":\"\",\"E_no\":\"1\",\"E_Category\":\"\",\"E_Name\":\"\",\"E_Memo\":\"\",\"_id\":1,\"E_URL\":\"\"},{\"E_Pic_URL\":\"\",\"E_Geo\":\"\",\"E_Info\":\"\",\"E_no\":\"1\",\"E_Category\":\"\",\"E_Name\":\"\",\"E_Memo\":\"\",\"_id\":1,\"E_URL\":\"\"}]}}"
+        val item = Gson().fromJson(successJsonStr, ResponseItem::class.java)
+        `when`(rope.getHouseData(itemLogin.token)).thenReturn(Observable.just(item))
+
+        presenter.onLogin(account, password)
+
+        val listType = object : TypeToken<ArrayList<MainHouseListItem>>() {}.type
+        val listData: ArrayList<MainHouseListItem> = Gson().fromJson(item.resultJsonArray.toString(), listType)
+
+        verify(view).onHouseDataLoadSuccess(item.resultJsonArray.toString(), listData)
+    }
+
+
+    @Test
     fun `Init House Data Has Http Failed or Observable Is Null`() {
+        val temToken = "token"
         val expectErrorType = 1
 
-        `when`(rope.getHouseData()).thenReturn(Observable.error(NullPointerException()))
+        `when`(rope.getHouseData(temToken)).thenReturn(Observable.error(NullPointerException()))
 
-        presenter.initHouseData()
+        presenter.initHouseData(temToken)
 
         verify(view).onShowErrorMsg(expectErrorType)
     }
 
     @Test
     fun `Init House Data Has Http Success But Json Inner Error`() {
+        val temToken = "token"
         val successJsonStr = "{}"
         val expectErrorType = 1
 
         val item = Gson().fromJson(successJsonStr, ResponseItem::class.java)
 
-        `when`(rope.getHouseData()).thenReturn(Observable.just(item))
+        `when`(rope.getHouseData(temToken)).thenReturn(Observable.just(item))
 
-        presenter.initHouseData()
+        presenter.initHouseData(temToken)
 
         verify(view).onShowErrorMsg(expectErrorType)
     }
 
     @Test
     fun `Init House Data Has Http Success`() {
+        val temToken = "token"
         val successJsonStr = "{\"result\":{\"results\":[{\"E_Pic_URL\":\"\",\"E_Geo\":\"\",\"E_Info\":\"\",\"E_no\":\"1\",\"E_Category\":\"\",\"E_Name\":\"\",\"E_Memo\":\"\",\"_id\":1,\"E_URL\":\"\"},{\"E_Pic_URL\":\"\",\"E_Geo\":\"\",\"E_Info\":\"\",\"E_no\":\"1\",\"E_Category\":\"\",\"E_Name\":\"\",\"E_Memo\":\"\",\"_id\":1,\"E_URL\":\"\"}]}}"
 
         val item = Gson().fromJson(successJsonStr, ResponseItem::class.java)
 
-        `when`(rope.getHouseData()).thenReturn(Observable.just(item))
+        `when`(rope.getHouseData(temToken)).thenReturn(Observable.just(item))
 
-        presenter.initHouseData()
+        presenter.initHouseData(temToken)
 
         val listType = object : TypeToken<ArrayList<MainHouseListItem>>() {}.type
         val listData: ArrayList<MainHouseListItem> = Gson().fromJson(item.resultJsonArray.toString(), listType)

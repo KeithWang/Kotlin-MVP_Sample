@@ -13,8 +13,27 @@ class RxMainPresenter(private val mView: RxMainBridge.View
                       , private val mApiRepo: RetrofitApiRepository
                       , private val mRxProvider: SchedulerProvider) : RxMainBridge.Presenter {
 
-    override fun initHouseData() {
-        mApiRepo.getHouseData()
+    override fun onLogin(email: String, password: String) {
+        mApiRepo.getToken(email, password)
+                .subscribeOn(mRxProvider.io())
+                .observeOn(mRxProvider.ui())
+                .doOnSubscribe { mView.onShowLoadingView(true) }
+                .doFinally {
+                }
+                .subscribe({ result ->
+                    /*
+                    * It used toke token to simulate login action.
+                    * */
+                    initHouseData(result.token)
+                }, { error ->
+                    mView.onShowErrorMsg(2)
+                    mView.onShowLoadingView(false)
+                    error.printStackTrace()
+                })
+    }
+
+    override fun initHouseData(token: String) {
+        mApiRepo.getHouseData(token)
                 .subscribeOn(mRxProvider.io())
                 .observeOn(mRxProvider.ui())
                 .doOnSubscribe { mView.onShowLoadingView(true) }

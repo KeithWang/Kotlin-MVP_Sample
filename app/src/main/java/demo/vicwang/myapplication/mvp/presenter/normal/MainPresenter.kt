@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import demo.vicwang.myapplication.adapter.item.HouseListAnimalItem
 import demo.vicwang.myapplication.adapter.item.MainHouseListItem
+import demo.vicwang.myapplication.mvp.model.LoginResponseItem
 import demo.vicwang.myapplication.mvp.model.ResponseItem
 import demo.vicwang.myapplication.mvp.model.normal.ApiCallback
 import demo.vicwang.myapplication.mvp.model.normal.ApiRepository
@@ -14,9 +15,25 @@ class MainPresenter(view: MainBridge.View, repo: ApiRepository) : MainBridge.Pre
     private val mView: MainBridge.View = view
     private val mApiRepo: ApiRepository = repo
 
-    override fun initHouseData() {
+
+    override fun onLogin(email: String, password: String) {
         mView.onShowLoadingView(true)
-        mApiRepo.getHouseData(object : ApiCallback {
+
+        mApiRepo.getToken(email, password, object : ApiCallback {
+            override fun onSuccess(resultMsg: String) {
+                val obj = Gson().fromJson(resultMsg, LoginResponseItem::class.java)
+                initHouseData(obj.token)
+            }
+
+            override fun onFailed(errorMsg: String, e: Exception) {
+                mView.onShowErrorMsg(2)
+                mView.onShowLoadingView(false)
+            }
+        })
+    }
+
+    override fun initHouseData(token: String) {
+        mApiRepo.getHouseData(token, object : ApiCallback {
             override fun onSuccess(resultMsg: String) {
                 try {
                     val array = Gson().fromJson(resultMsg, ResponseItem::class.java).resultJsonArray

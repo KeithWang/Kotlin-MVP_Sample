@@ -66,7 +66,7 @@ abstract class BasicActivity : AppCompatActivity() {
             when (v.id) {
                 R.id.custom_dialog_btn_confirm -> {
                     mDialog.dismiss()
-                    if (errorType == 1)
+                    if (errorType == 1 || errorType == 2)
                         finish()
                 }
             }

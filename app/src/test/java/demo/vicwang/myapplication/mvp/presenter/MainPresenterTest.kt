@@ -4,9 +4,9 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import demo.vicwang.myapplication.adapter.item.HouseListAnimalItem
 import demo.vicwang.myapplication.adapter.item.MainHouseListItem
+import demo.vicwang.myapplication.mvp.model.ResponseItem
 import demo.vicwang.myapplication.mvp.model.normal.ApiCallback
 import demo.vicwang.myapplication.mvp.model.normal.ApiRepository
-import demo.vicwang.myapplication.mvp.model.ResponseItem
 import demo.vicwang.myapplication.mvp.presenter.normal.MainBridge
 import demo.vicwang.myapplication.mvp.presenter.normal.MainPresenter
 import org.junit.Before
@@ -32,39 +32,38 @@ class MainPresenterTest {
     }
 
     @Test
-    fun `Init House Data Has Http Failed`() {
+    fun `Login Fail`() {
+        val account = "account"
+        val password = "password"
         val failString = "fail"
-        val expectErrorType = 1
+        val expectErrorType = 2
 
         doAnswer {
             val arguments = it.arguments
-            val callback = arguments[0] as ApiCallback
+            val callback = arguments[2] as ApiCallback
             callback.onFailed(failString, Exception())
-        }.`when`(rope).getHouseData(any(ApiCallback::class.java))
+        }.`when`(rope).getToken(ArgumentMatchers.anyString(), ArgumentMatchers.anyString(), any(ApiCallback::class.java))
 
-        presenter.initHouseData()
+        presenter.onLogin(account, password)
 
         verify(view).onShowErrorMsg(expectErrorType)
     }
 
     @Test
-    fun `Init House Data Has Http Success But Json Error`() {
-        val successJsonStr = ""
-        val expectErrorType = 1
+    fun `Login Success And Get Data Success`() {
+        val account = "account"
+        val password = "password"
+        val resultStr = "{\"token\":\"token\"}"
 
         doAnswer {
             val arguments = it.arguments
-            val callback = arguments[0] as ApiCallback
-            callback.onSuccess(successJsonStr)
-        }.`when`(rope).getHouseData(any(ApiCallback::class.java))
+            val callback = arguments[2] as ApiCallback
+            callback.onSuccess(resultStr)
+        }.`when`(rope).getToken(ArgumentMatchers.anyString(), ArgumentMatchers.anyString(), any(ApiCallback::class.java))
 
-        presenter.initHouseData()
-
-        verify(view).onShowErrorMsg(expectErrorType)
-    }
-
-    @Test
-    fun `Init House Data Has Http Success`() {
+        /*
+        * login success
+        * */
         val successJsonStr = "{\"result\":{\"results\":[{\"E_Pic_URL\":\"\",\"E_Geo\":\"\",\"E_Info\":\"\",\"E_no\":\"1\",\"E_Category\":\"\",\"E_Name\":\"\",\"E_Memo\":\"\",\"_id\":1,\"E_URL\":\"\"},{\"E_Pic_URL\":\"\",\"E_Geo\":\"\",\"E_Info\":\"\",\"E_no\":\"1\",\"E_Category\":\"\",\"E_Name\":\"\",\"E_Memo\":\"\",\"_id\":1,\"E_URL\":\"\"}]}}"
 
         val successArray = Gson().fromJson(successJsonStr, ResponseItem::class.java).resultJsonArray
@@ -74,11 +73,67 @@ class MainPresenterTest {
 
         doAnswer {
             val arguments = it.arguments
-            val callback = arguments[0] as ApiCallback
+            val callback = arguments[1] as ApiCallback
             callback.onSuccess(successJsonStr)
-        }.`when`(rope).getHouseData(any(ApiCallback::class.java))
+        }.`when`(rope).getHouseData(ArgumentMatchers.anyString(), any(ApiCallback::class.java))
 
-        presenter.initHouseData()
+        presenter.onLogin(account, password)
+
+
+        verify(view).onHouseDataLoadSuccess(successArray.toString(), successListData)
+    }
+
+    @Test
+    fun `Init House Data Has Http Failed`() {
+        val temToken = "token"
+        val failString = "fail"
+        val expectErrorType = 1
+
+        doAnswer {
+            val arguments = it.arguments
+            val callback = arguments[1] as ApiCallback
+            callback.onFailed(failString, Exception())
+        }.`when`(rope).getHouseData(ArgumentMatchers.anyString(), any(ApiCallback::class.java))
+
+        presenter.initHouseData(temToken)
+
+        verify(view).onShowErrorMsg(expectErrorType)
+    }
+
+    @Test
+    fun `Init House Data Has Http Success But Json Error`() {
+        val temToken = "token"
+        val successJsonStr = ""
+        val expectErrorType = 1
+
+        doAnswer {
+            val arguments = it.arguments
+            val callback = arguments[1] as ApiCallback
+            callback.onSuccess(successJsonStr)
+        }.`when`(rope).getHouseData(ArgumentMatchers.anyString(), any(ApiCallback::class.java))
+
+        presenter.initHouseData(temToken)
+
+        verify(view).onShowErrorMsg(expectErrorType)
+    }
+
+    @Test
+    fun `Init House Data Has Http Success`() {
+        val temToken = "token"
+        val successJsonStr = "{\"result\":{\"results\":[{\"E_Pic_URL\":\"\",\"E_Geo\":\"\",\"E_Info\":\"\",\"E_no\":\"1\",\"E_Category\":\"\",\"E_Name\":\"\",\"E_Memo\":\"\",\"_id\":1,\"E_URL\":\"\"},{\"E_Pic_URL\":\"\",\"E_Geo\":\"\",\"E_Info\":\"\",\"E_no\":\"1\",\"E_Category\":\"\",\"E_Name\":\"\",\"E_Memo\":\"\",\"_id\":1,\"E_URL\":\"\"}]}}"
+
+        val successArray = Gson().fromJson(successJsonStr, ResponseItem::class.java).resultJsonArray
+
+        val listType = object : TypeToken<ArrayList<MainHouseListItem>>() {}.type
+        val successListData: ArrayList<MainHouseListItem> = Gson().fromJson(successArray.toString(), listType)
+
+        doAnswer {
+            val arguments = it.arguments
+            val callback = arguments[1] as ApiCallback
+            callback.onSuccess(successJsonStr)
+        }.`when`(rope).getHouseData(ArgumentMatchers.anyString(), any(ApiCallback::class.java))
+
+        presenter.initHouseData(temToken)
 
         verify(view).onHouseDataLoadSuccess(successArray.toString(), successListData)
     }
