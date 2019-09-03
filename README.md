@@ -1,7 +1,7 @@
 # Android Kotlin MVP 
 This is MVP sample for Android, and used free api to show information from Taipei city zoo. 
 <br>
-This project used login function to simulate that get token and data. And has unit test which two method to test the presenter for MVP architecture. 
+This project used login function to simulate that get token and data. And it has unit test which two method to test the presenter for MVP architecture. 
 One way is normal method with okhttp3, aother is use rxjava2 and retrofit2 to build.
 
 
